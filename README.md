@@ -4,7 +4,7 @@
 This repository  contains two parts:
 
  - **Get the FRG Flow Equation**
- - [x] Feynman Rules from Lagrangian
+ - [ ] Feynman Rules from Lagrangian
  - [ ] FRG Vertex Expansion(get the loop diagram)
  - [ ] Tensor Projection and Super-Trace Computation(tensor contraction; internal momentum integration; matsubara sum)
 
