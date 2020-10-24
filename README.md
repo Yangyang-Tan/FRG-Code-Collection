@@ -9,6 +9,7 @@ This repository  contains two parts:
  - [ ] Tensor Projection and Super-Trace Computation(tensor contraction; internal momentum integration; matsubara sum)
 
  - **Solve the FRG Equation**
+ 
 We use [Julia](https://github.com/JuliaLang/julia) to solve the FRG equation. To solve FRG equation efficiently we needs lots of numeral tricks. We list these tricks below:
 - [ ] Numerical Integration(CPU)
 - [ ] Numerical Integration(GPU)
