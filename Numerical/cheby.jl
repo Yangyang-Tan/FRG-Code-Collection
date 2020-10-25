@@ -160,21 +160,4 @@ testu=Tnt*(sol.u)[end]
 Fun(testu)
 
 
-testu[end-5:end].=0
 
-
-
-
-
-using LinearAlgebra
-BLAS.set_num_threads(2)
-sqrt(2 * (0.0129) * Λ^2)
-
-
-a=rand(10000,10000)
-
-b=rand(10000,10000)
-
-c=rand(10000,10000)
-
-@elapsed a*b
