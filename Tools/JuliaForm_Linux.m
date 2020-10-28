@@ -22,7 +22,7 @@ copyUnicode[expr_] :=
 
 
 JuliaForm[expr_, option_ : Identity] := 
- copyUnicode[StringReplace[{"Pi"->"pi"}]@StringDelete[
+ ToString[StringDelete[
    FixedPoint[
     StringReplace[
      Longest[namedfunc : ( LetterCharacter .. ~~ WordCharacter ...) ~~
@@ -33,7 +33,7 @@ JuliaForm[expr_, option_ : Identity] :=
     StringDelete[
      StringDelete[
       ToString[InputForm[option[expr] //. Exp[x_] :> exp[x]]], {" ", 
-       "\n"}], " "]], {" ", "\n"}]]
+       "\n"}], " "]], {" ", "\n"}],CharacterEncoding -> "Unicode"]
 
 
 JuliaFormV[expr_, option_Symbol : Identity, 
