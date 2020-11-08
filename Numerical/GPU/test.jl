@@ -1,33 +1,39 @@
-using CUDA, Interpolations
-# N is the dimensionality (1, 2 or 3)
-# T is the element type (needs to be supported by the texture hardware)
-device!(1)
-T=Float64
-N=1
-# source array
-src = rand(T, fill(10, N)...)
+using CUDA, Interpolations,Plots
+src = Float32[sin(i/5)+i/5 for i in 1:5000]
 
-# indices we want to interpolate
-idx = [tuple(rand(1:0.1:10, N)...) for _ in 1:10]
 
-# upload to the GPU
-gpu_src = CuArray(src)
+plot([src],seriestype=:scatter)
+
+plot([gpu_dst],seriestype=:scatter)
+
+idx = collect(1:0.01:41.9599)
+int = interpolate(src, BSpline(Cubic(Line(OnGrid()))))
+dst = similar(src, size(idx))
+dst .= int.(idx)
+
 gpu_idx = CuArray(idx)
+gpu_dst = CuArray{Float32}(undef, size(idx))
+gpu_src = CuArray(src)
+gpu_tex = CuTexture(CuTextureArray(gpu_src); interpolation=CUDA.CubicInterpolation());
 
-# interpolate using a texture
-gpu_dst = CuArray{T}(undef, size(gpu_idx))
-gpu_tex = CuTexture(gpu_src, interpolation=CUDA.NearestNeighbour())
+broadcast!(f1,gpu_dst, gpu_idx, Ref(gpu_tex))
 
-gpu_tex[1]
 
-broadcast!(gpu_dst, gpu_idx, Ref(gpu_tex)) do idx, tex
-    tex[idx...]
-end
+gpu_dst .= f1.(gpu_idx,Ref(gpu_tex))
 
-# back to the CPU
-dst = Array(gpu_dst)
 
-a=CuArray(rand(100,100))
-b=CuArray(rand(100,100))
-c=a+b
-c
+f1(x,y)=y[x]
+
+
+
+f1.(gpu_idx,Ref(gpu_tex))
+
+gpu_dst[1344]
+
+dst[1345]
+
+idx[1345]|>f2
+
+f2(i)=sin(i/5)+i/5
+
+CUDA.allowscalar(true)

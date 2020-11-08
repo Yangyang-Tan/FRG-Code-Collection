@@ -2,7 +2,10 @@ using CUDA
 
 using Test
 
-CUDA.fma()
+
+
+
+
 
 "Dummy kernel doing 100 FMAs."
 function kernel_100fma(a, b, c, out)
@@ -59,18 +62,51 @@ CUDA.@time sum(f1.(cuv1))
 
 
 
+myf(x)=sqrt()
+
+
+v1=fill(1.2345,m*m)
+
+
+
+@elapsed @avx sqrt.(v1)
+
+@elapsed @avx for i in 1:m*m
+    v1[i]=sqrt(v1[i])
+end
+
+v1
+
+v1=rand(cutype,n*n)
 
 CUDA.device!(1)
 using CUDA
 using LinearAlgebra
-const m=20000
-const n=20000
-const p=20000
+BLAS.set_num_threads(1)
+const m=5000
+const n=5000
+const p=5000
 tflop=2*m*n*p *10^-12
-cutype=Float32
+cutype=Float64
 v1=rand(cutype,n,n)
 v2=rand(cutype,n,n)
 v3=rand(cutype,n,n)
+
+function A_mul_B!(𝐂, 𝐀, 𝐁)
+    @simd for m ∈ axes(𝐀,1), n ∈ axes(𝐁,2)
+        𝐂ₘₙ = zero(eltype(𝐂))
+    @simd for k ∈ axes(𝐀,2)
+            𝐂ₘₙ += 𝐀[m,k] * 𝐁[k,n]
+        end
+        𝐂[m,n] = 𝐂ₘₙ
+    end
+end
+
+
+
+
+
+
 
 cuv1=CUDA.rand(cutype,m,n);
 
@@ -92,13 +128,15 @@ finalize(afv2)
 finalize(afv3)
 
 
+1
+@elapsed v3.=v1.*v2
 
-cput=@elapsed mul!(v3,v1,v2)
 gput=CUDA.@elapsed CUDA.@sync mul!(cuv3,cuv1,cuv2)
 gput=CUDA.@elapsed CUDA.@sync (cuv3=cuv1*cuv2;)
 GC.gc(true)
 CUDA.reclaim()
 
+cput=@elapsed A_mul_B!(v3,v1,v2)
 
 
 finalize(afv1)
