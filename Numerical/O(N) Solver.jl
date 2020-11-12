@@ -1,11 +1,10 @@
 using DifferentialEquations, SparseArrays, BandedMatrices, Plots
-using Optim
+using Optim,ApproxFun
 include("cheby.jl")
 
 const Λ = Float64(800.0)
 const h = Float64(6.4)
-const λ = Float64(8.0)
-const ρmax = Float64(0.03)
+const ρmax = Float64(0.05)
 const S = Chebyshev(0.0..ρmax)
 const ρ = points(S, gridnum)
 
@@ -29,8 +28,8 @@ flow2(ρbar, Vp, Vpp, t) =
 
 function eqn(du, u, p, t)
     coeffa1 = Tnt * u
-    coeffb1 = chder(Float64(0.0), ρmax, coeffa1, gridnum)
-    coeffc1 = chder(Float64(0.0), ρmax, coeffb1, gridnum)
+    coeffb1 = chderive(Float64(0.0), ρmax, coeffa1, gridnum)
+    coeffc1 = chderive(Float64(0.0), ρmax, coeffb1, gridnum)
     Vp = Tn * coeffb1
     Vpp = Tn * coeffc1
     du .= flow2.(ρ, Vp, Vpp, t)
@@ -74,29 +73,30 @@ prob = ODEProblem(eqn, u0, (Float64(0.0), Float64(log(1 / Λ))))
 # alg8=  AutoVern9(Rodas5())
 
 
-alg7=  AutoVern7(TRBDF2())
+alg7=  AutoVern8(TRBDF2())
 
-
+using LinearAlgebra
+BLAS.set_num_threads(1)
 
 @time sol = solve(
     prob,
-    Rosenbrock32(),
+    alg7,
     adaptive = true,
-    reltol = 1e-8,
-    abstol = 1e-8,
-    save_everystep = true,
+    reltol = 1e-10,
+    abstol = 1e-10,
+    save_everystep = false,
     dtmin=0.0,
 )
 
 
 Vout = Fun(S, ApproxFun.transform(S, (sol.u)[end]))
 
-Vout = Fun(Chebyshev(),testu)
 
 plot(ρ[1:end],u0[1:end],seriestype=:scatter)
 
-
 plot(ρ[123:end-20],[(sol.u)[end][123:end-20]],seriestype=:scatter)
+
+plot(ρ,[(sol.u)[end]],seriestype=:scatter)
 
 
 plot([Vout],0.0,0.01)
