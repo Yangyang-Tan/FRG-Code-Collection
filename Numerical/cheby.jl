@@ -1,5 +1,5 @@
 
-const gridnum = 200
+const gridnum =200
 Tn = Array{Float64,2}(undef, gridnum, gridnum)
 
 
@@ -10,7 +10,7 @@ function chderive(xmin, xmax, input, ngrid)
     cder = similar(input)
     cder[ngrid] = Float64(0.0)
     cder[ngrid-1] = 2 * (ngrid - 1) * input[ngrid]
-    @inbounds @fastmath for j = ngrid-2:-1:1
+    for j = ngrid-2:-1:1
         cder[j] = cder[j+2] + 2 * j * input[j+1]
     end
     con = (Float64(2.0)) / (xmax - xmin)
